@@ -5,23 +5,11 @@ import signal
 
 
 
-SPEED = 1
+SPEED = 0.1
 
 def ssleep(n):
     sleep(n * SPEED)
 
-
-
-def attempt(fn, max_retries, delay, *args):
-    i = 0
-    while i < max_retries:
-        i += 1
-        try:
-            result = fn(*args)
-            return result
-        except:
-            ssleep(delay)
-    raise Exception("out of retries")
 
 
 def attempt_predicate(fn, max_retries, delay, *args):
@@ -30,7 +18,7 @@ def attempt_predicate(fn, max_retries, delay, *args):
         i += 1
         if fn(*args):
             return
-        ssleep(delay)
+        sleep(delay)
     raise Exception("out of retries")
 
 
@@ -59,6 +47,10 @@ def is_promoted(twat):
 
 
 def scroll_to(element):
+    # TODO: this works until we've blocked accounts and the tweets disappear
+    # i assume this is because the tweets do disappear and everything gets offset
+    # by the height of said tweets. maybe we could just save the height of each
+    # tweet and use that as an offset in here? *shrugs*
     desired_y = (element.size['height'] / 2) + element.location['y']
     window_h = driver.execute_script('return window.innerHeight')
     window_y = driver.execute_script('return window.pageYOffset')
@@ -86,7 +78,7 @@ log = open("block_log.txt", "a")
 
 def signal_handler(sig, frame):
     log.close()
-    driver.quit()
+    driver.quit() # TODO: make this actually work properly...
     exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
